@@ -23,6 +23,65 @@ func (t *template) varCount() int {
 	return result
 }
 
+func (t *template) check(filenames []string) error {
+	regex := t.toRegex()
+	for _, s := range filenames {
+		test := regex.FindStringSubmatch(s)
+		if test == nil {
+			return errInvalidTemplate
+		}
+	}
+	return nil
+}
+
+// fix searches and removes redundant vars
+func (t *template) fix(filenames []string) template {
+	regex := t.toRegex()
+	varCount := t.varCount()
+	hasNonEmpty := make([]int, varCount)
+	for _, s := range filenames {
+		test := regex.FindStringSubmatch(s)
+		if test == nil {
+			return *t
+		}
+		for i := 1; i <= varCount; i++ {
+			if !spaceRegex.MatchString(test[i]) {
+				hasNonEmpty[i-1]++
+			}
+		}
+	}
+	varsToRemove := make([]int, 0, varCount)
+	for i, value := range hasNonEmpty {
+		if value == 0 {
+			varsToRemove = append(varsToRemove, i)
+		}
+	}
+	if len(varsToRemove) > 0 {
+		return t.removeVars(varsToRemove)
+	}
+	return *t
+}
+
+func (t *template) removeVars(indices []int) template {
+	if len(indices) == 0 {
+		return *t
+	}
+	runes := make([]rune, 0, len(t.runes)-len(indices))
+	curIndex := -1
+	removeIndex := 0
+	for _, r := range t.runes {
+		if r == '*' {
+			curIndex++
+			if removeIndex < len(indices) && curIndex == indices[removeIndex] {
+				removeIndex++
+				continue
+			}
+		}
+		runes = append(runes, r)
+	}
+	return template{runes}
+}
+
 func (t *template) toRegexString() string {
 	var builder strings.Builder
 	var subBuilder strings.Builder
@@ -111,7 +170,10 @@ func findTemplateForPair(str1 []rune, str2 []rune) template {
 			index--
 		} else if table[i1-1][j1] > table[i1][j1-1] {
 			i1--
-			// IMPORTANT: no skips are added in attempt to make resulting template var-minimal
+			if !skips[index] {
+				skips[index] = true
+				skipsCount++
+			}
 		} else {
 			j1--
 			if !skips[index] {
@@ -160,11 +222,10 @@ func restoreTemplate(filenames []string) (*template, error) {
 		pairTemplate := findTemplateForPair([]rune(filenames[i-1]), []rune(filenames[i]))
 		curTemplate = curTemplate.merge(pairTemplate)
 	}
-	regex := curTemplate.toRegex()
-	for _, s := range filenames {
-		if test := regex.FindStringSubmatch(s); test == nil {
-			return nil, errTemplateRestorationFailed
-		}
+	err := curTemplate.check(filenames)
+	if err != nil {
+		return nil, err
 	}
+	curTemplate = curTemplate.fix(filenames)
 	return &curTemplate, nil
 }

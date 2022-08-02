@@ -210,3 +210,19 @@ func TestMultipleEpisodeMetadata9(t *testing.T) {
 	}
 	assert.Equal(t, metadataArr, expected)
 }
+
+func TestMultipleEpisodeMetadata10(t *testing.T) {
+	input := make([]string, 0, 256)
+	input = append(input, genInput("Dr Stone Season 2/Dr Stone - %02d.mkv", 1, 11)...)
+	input = append(input, genInput("Dr Stone/Dr Stone - %02d.mkv", 1, 24)...)
+
+	expected := make([]EpisodeMetadata, 0, 256)
+	expected = append(expected, genOutput("Season 2", "%02d", 1, 11)...)
+	expected = append(expected, genOutput("", "%02d", 1, 24)...)
+
+	metadataArr, success := ParseMultipleEpisodeMetadata(input)
+	if !success {
+		t.Fatal("Used single parser here")
+	}
+	assert.Equal(t, metadataArr, expected)
+}

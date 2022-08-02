@@ -2,7 +2,7 @@ package roflmeta
 
 import "errors"
 
-var errTemplateRestorationFailed = errors.New("template restoration failed")
+var errInvalidTemplate = errors.New("invalid template")
 
 func substringStart(input string, start int) string {
 	runes := []rune(input)

@@ -25,6 +25,7 @@ func randomString() string {
 func testPairImpl(t *testing.T, str1 string, str2 string, expected string) {
 	expectedTemplate := newTemplate(expected)
 	resultTemplate := findTemplateForPair([]rune(str1), []rune(str2))
+	resultTemplate = resultTemplate.fix([]string{str1, str2})
 	if !reflect.DeepEqual(expectedTemplate, resultTemplate) {
 		t.Fatalf("Invalid pair result: expected %s, got %s", expectedTemplate.String(), resultTemplate.String())
 	}
@@ -58,6 +59,10 @@ func TestPairMultipleSolutions(t *testing.T) {
 	t.Skip("this test doesn't work")
 	testPairImpl(t, "24x01.mkv", "01x02.mkv", "*x0*.mkv")
 	testPairImpl(t, "01x24.mkv", "02x01.mkv", "*x*.mkv")
+}
+
+func TestSpecial(t *testing.T) {
+	testPairImpl(t, "Dr Stone Season 2/Dr Stone - 01.mkv", "Dr Stone/Dr Stone - 01.mkv", "Dr Stone*/Dr Stone - 01.mkv")
 }
 
 func TestRestoreSimple(t *testing.T) {
