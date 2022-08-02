@@ -63,7 +63,7 @@ roflmeta.ParseMultipleEpisodeMetadata(filenames)
 ## Installation
 
 ```
-import "gopkg.in/rofleksey/roflmeta"
+go get "https://github.com/rofleksey/roflmeta"
 ```
 
 ## License

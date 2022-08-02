@@ -148,17 +148,23 @@ func findTemplateForPair(str1 []rune, str2 []rune) template {
 	return template{result}
 }
 
-func restoreTemplate(filenames []string) template {
+func restoreTemplate(filenames []string) (*template, error) {
 	if len(filenames) == 0 {
-		return template{}
+		return &template{}, nil
 	}
 	if len(filenames) == 1 {
-		return template{[]rune(filenames[0])}
+		return &template{[]rune(filenames[0])}, nil
 	}
 	curTemplate := findTemplateForPair([]rune(filenames[0]), []rune(filenames[1]))
 	for i := 2; i < len(filenames); i++ {
 		pairTemplate := findTemplateForPair([]rune(filenames[i-1]), []rune(filenames[i]))
 		curTemplate = curTemplate.merge(pairTemplate)
 	}
-	return curTemplate
+	regex := curTemplate.toRegex()
+	for _, s := range filenames {
+		if test := regex.FindStringSubmatch(s); test == nil {
+			return nil, errTemplateRestorationFailed
+		}
+	}
+	return &curTemplate, nil
 }

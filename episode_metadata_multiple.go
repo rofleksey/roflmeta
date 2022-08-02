@@ -100,7 +100,13 @@ func ParseMultipleEpisodeMetadata(filenames []string) ([]EpisodeMetadata, bool) 
 		return []EpisodeMetadata{ParseSingleEpisodeMetadata(filenames[0])}, true
 	}
 
-	t := restoreTemplate(filenames)
+	t, err := restoreTemplate(filenames)
+
+	if err != nil {
+		// something went wrong, fallback to single
+		return fallbackToSingleParser(filenames), false
+	}
+
 	varCount := t.varCount()
 	regex := t.toRegex()
 

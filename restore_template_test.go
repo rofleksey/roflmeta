@@ -32,8 +32,11 @@ func testPairImpl(t *testing.T, str1 string, str2 string, expected string) {
 
 func testRestore(t *testing.T, expected string, strings ...string) {
 	expectedTemplate := newTemplate(expected)
-	resultTemplate := restoreTemplate(strings)
-	if !reflect.DeepEqual(expectedTemplate, resultTemplate) {
+	resultTemplate, err := restoreTemplate(strings)
+	if err != nil {
+		t.Fatalf("Template restoration failed, expected %s", expectedTemplate.String())
+	}
+	if !reflect.DeepEqual(&expectedTemplate, resultTemplate) {
 		t.Fatalf("Invalid restore result: expected %s, got %s", expectedTemplate.String(), resultTemplate.String())
 	}
 }
