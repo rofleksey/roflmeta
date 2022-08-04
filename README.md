@@ -16,8 +16,8 @@
 
 ## Overview
 
-This library allows to extract season and episode names from file names.
-This might be particularly useful if dealing with files in torrents, as they almost never come presorted
+This library allows to extract season and episode names from video file names.
+This might be particularly useful if dealing with video files in torrents, as they almost never come presorted
 in order of broadcast and there is no universal regex to parse episode and season info from them.
 
 ## How To Use
@@ -39,12 +39,12 @@ generally displayed in frontend as is.
 There are two functions: "single" and "multiple". The former is straightforward:
 
 ```go
-import "gopkg.in/rofleksey/roflmeta"
+import "github.com/rofleksey/roflmeta"
 
-roflmeta.ParseSingleEpisodeMetadata("[Judas] Hunter x Hunter (2011) - S01E012.mkv")
+metadata := roflmeta.ParseSingleEpisodeMetadata("[Judas] Hunter x Hunter (2011) - S01E012.mkv")
 // EpisodeMetadata{season=01, episode=012}
 
-roflmeta.ParseSingleEpisodeMetadata("[Samir755] Hellsing Ultimate 02.mkv")
+metadata := roflmeta.ParseSingleEpisodeMetadata("[Samir755] Hellsing Ultimate 02.mkv")
 // EpisodeMetadata{season=Hellsing Ultimate, episode=02}
 ```
 
@@ -52,13 +52,15 @@ The "multiple" function tries to figure out information by restoring template us
 It fallbacks to single parser on failure:
 
 ```go
-import "gopkg.in/rofleksey/roflmeta"
+import "github.com/rofleksey/roflmeta"
 
 filenames := []string{"S01E001.mkv", "S01E002.mkv", ..., "S01E148.mkv"}
 
-roflmeta.ParseMultipleEpisodeMetadata(filenames)
+metadataSlice, noFallback := roflmeta.ParseMultipleEpisodeMetadata(filenames)
 // []EpisodeMetadata where season = 01, episode = 001...148
 ```
+
+All functions ignore non-video files and return empty struct for them.
 
 ## Installation
 

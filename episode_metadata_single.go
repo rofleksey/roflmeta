@@ -26,6 +26,9 @@ var sSxERegex = regexp.MustCompile("(?i)(\\d+)\\s*x\\s*(\\d+)")
 // See EpisodeMetadata for details
 // For a list of filenames use ParseMultipleEpisodeMetadata
 func ParseSingleEpisodeMetadata(filename string) EpisodeMetadata {
+	if !isVideo(filename) {
+		return EpisodeMetadata{}
+	}
 	var resultSeason string
 	var resultEpisode string
 

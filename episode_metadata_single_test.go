@@ -12,7 +12,7 @@ func TestSingleEpisodeMetadata1(t *testing.T) {
 }
 
 func TestSingleEpisodeMetadata2(t *testing.T) {
-	metadata := ParseSingleEpisodeMetadata("[Judas] Hunter x Hunter (2011) - S01E008.mkv ")
+	metadata := ParseSingleEpisodeMetadata("[Judas] Hunter x Hunter (2011) - S01E008.mkv")
 	assert.Equal(t, metadata.Season, "01")
 	assert.Equal(t, metadata.Episode, "008")
 }
@@ -24,7 +24,7 @@ func TestSingleEpisodeMetadata3(t *testing.T) {
 }
 
 func TestSingleEpisodeMetadata4(t *testing.T) {
-	metadata := ParseSingleEpisodeMetadata("[Judas] Hunter x Hunter (2011) - S01E113.mkv ")
+	metadata := ParseSingleEpisodeMetadata("[Judas] Hunter x Hunter (2011) - S01E113.mkv")
 	assert.Equal(t, metadata.Season, "01")
 	assert.Equal(t, metadata.Episode, "113")
 }
@@ -48,7 +48,7 @@ func TestSingleEpisodeMetadata7(t *testing.T) {
 }
 
 func TestSingleEpisodeMetadata8(t *testing.T) {
-	metadata := ParseSingleEpisodeMetadata("[DB]Kabukimonogatari_-_NCED01_(10bit_BD1080p_x265).mkv ")
+	metadata := ParseSingleEpisodeMetadata("[DB]Kabukimonogatari_-_NCED01_(10bit_BD1080p_x265).mkv")
 	assert.Equal(t, metadata.Season, "Kabukimonogatari")
 	assert.Equal(t, metadata.Episode, "NCED01")
 }
@@ -132,7 +132,7 @@ func TestSingleEpisodeMetadata21(t *testing.T) {
 }
 
 func TestSingleEpisodeMetadata22(t *testing.T) {
-	metadata := ParseSingleEpisodeMetadata("[Nep_Blanc] Death Note 35 .mkv ")
+	metadata := ParseSingleEpisodeMetadata("[Nep_Blanc] Death Note 35.mkv")
 	assert.Equal(t, metadata.Season, "Death Note")
 	assert.Equal(t, metadata.Episode, "35")
 }
@@ -176,4 +176,10 @@ func TestSingleEpisodeMetadata29(t *testing.T) {
 	metadata := ParseSingleEpisodeMetadata("[Anime Time] Durarara!! X2 Ketsu/[Anime Time] Durarara!! X2 Ketsu - 7.5.mkv")
 	assert.Equal(t, metadata.Season, "Durarara!! X2 Ketsu")
 	assert.Equal(t, metadata.Episode, "7.5")
+}
+
+func TestSingleEpisodeMetadata30(t *testing.T) {
+	metadata := ParseSingleEpisodeMetadata("[Nep_Blanc] Death Note 35.txt")
+	assert.Equal(t, metadata.Season, "")
+	assert.Equal(t, metadata.Episode, "")
 }

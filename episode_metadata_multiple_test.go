@@ -226,3 +226,25 @@ func TestMultipleEpisodeMetadata10(t *testing.T) {
 	}
 	assert.Equal(t, metadataArr, expected)
 }
+
+func TestMultipleEpisodeMetadata11(t *testing.T) {
+	input := make([]string, 0, 256)
+	input = append(input, genInput("[Judas] Jujutsu Kaisen - S01E%02d.mkv", 1, 12)...)
+	input = append(input, "wrong template 1.txt")
+	input = append(input, genInput("[Judas] Jujutsu Kaisen - S01E%02d.mkv", 13, 24)...)
+	input = append(input, "[Judas] Jujutsu Kaisen - S01SP1.mkv")
+	input = append(input, "[Judas] Jujutsu Kaisen - S01SP1.txt")
+
+	expected := make([]EpisodeMetadata, 0, 256)
+	expected = append(expected, genOutput("01", "E%02d", 1, 12)...)
+	expected = append(expected, genSingle("", ""))
+	expected = append(expected, genOutput("01", "E%02d", 13, 24)...)
+	expected = append(expected, genSingle("01", "SP1"))
+	expected = append(expected, genSingle("", ""))
+
+	metadataArr, success := ParseMultipleEpisodeMetadata(input)
+	if !success {
+		t.Fatal("Used single parser here")
+	}
+	assert.Equal(t, metadataArr, expected)
+}

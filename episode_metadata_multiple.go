@@ -88,6 +88,20 @@ func fallbackToSingleParser(filenames []string) []EpisodeMetadata {
 	return result
 }
 
+func restoreFullAnswer(allFilenames []string, videoFilenames []string, partialAnswer []EpisodeMetadata) []EpisodeMetadata {
+	fullResult := make([]EpisodeMetadata, 0, len(allFilenames))
+	videoIndex := 0
+	for _, name := range allFilenames {
+		if videoIndex < len(videoFilenames) && name == videoFilenames[videoIndex] {
+			fullResult = append(fullResult, partialAnswer[videoIndex])
+			videoIndex++
+		} else {
+			fullResult = append(fullResult, EpisodeMetadata{})
+		}
+	}
+	return fullResult
+}
+
 // ParseMultipleEpisodeMetadata attempts to parse metadata from multiple filenames
 // See EpisodeMetadata for details
 // It tries to figure out filenames' template and gather information according to it
@@ -99,8 +113,15 @@ func ParseMultipleEpisodeMetadata(filenames []string) ([]EpisodeMetadata, bool) 
 	if len(filenames) == 1 {
 		return []EpisodeMetadata{ParseSingleEpisodeMetadata(filenames[0])}, true
 	}
+	videoFilenames := make([]string, 0, len(filenames))
 
-	t, err := restoreTemplate(filenames)
+	for _, name := range filenames {
+		if isVideo(name) {
+			videoFilenames = append(videoFilenames, name)
+		}
+	}
+
+	t, err := restoreTemplate(videoFilenames)
 
 	if err != nil {
 		// something went wrong, fallback to single
@@ -112,10 +133,11 @@ func ParseMultipleEpisodeMetadata(filenames []string) ([]EpisodeMetadata, bool) 
 
 	// definitely a single season with changing episodes
 	if varCount == 1 {
-		return parseChangingEpisodes(filenames, regex, 1), true
+		partialAnswer := parseChangingEpisodes(videoFilenames, regex, 1)
+		return restoreFullAnswer(filenames, videoFilenames, partialAnswer), true
 	}
 
-	frequencies := calcRegexFrequencies(filenames, regex, varCount)
+	frequencies := calcRegexFrequencies(videoFilenames, regex, varCount)
 	distinctFreqCount := calcDistinctFrequencies(frequencies)
 	groupMonotonous := testFreqGroupMonotonous(frequencies)
 
@@ -129,11 +151,13 @@ func ParseMultipleEpisodeMetadata(filenames []string) ([]EpisodeMetadata, bool) 
 	if groupMonotonous {
 		// definitely only episodes
 		if distinctFreqCount == 1 {
-			return parseChangingEpisodes(filenames, regex, frequencies[len(frequencies)-1].group), true
+			partialAnswer := parseChangingEpisodes(videoFilenames, regex, frequencies[len(frequencies)-1].group)
+			return restoreFullAnswer(filenames, videoFilenames, partialAnswer), true
 		}
 		// probably seasons and episodes
 		if distinctFreqCount == 2 {
-			return parseEpisodesAndSeasons(filenames, regex, frequencies[len(frequencies)-2].group, frequencies[len(frequencies)-1].group), true
+			partialAnswer := parseEpisodesAndSeasons(videoFilenames, regex, frequencies[len(frequencies)-2].group, frequencies[len(frequencies)-1].group)
+			return restoreFullAnswer(filenames, videoFilenames, partialAnswer), true
 		}
 	}
 

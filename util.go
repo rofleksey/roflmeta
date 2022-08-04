@@ -1,6 +1,10 @@
 package roflmeta
 
-import "errors"
+import (
+	"errors"
+	"path/filepath"
+	"strings"
+)
 
 var errInvalidTemplate = errors.New("invalid template")
 
@@ -21,4 +25,12 @@ func substringStartEnd(input string, start int, end int) string {
 		end = len(runes)
 	}
 	return string(runes[start:end])
+}
+
+func isVideo(name string) bool {
+	ext := strings.ToLower(filepath.Ext(name))
+	if ext == ".mp4" || ext == ".m4v" || ext == ".mkv" || ext == ".webm" || ext == ".mov" || ext == ".avi" || ext == ".wmv" || ext == ".mpg" || ext == ".flv" || ext == ".3gp" {
+		return true
+	}
+	return false
 }

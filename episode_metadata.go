@@ -7,7 +7,8 @@ package roflmeta
 //
 // MUST follow these rules:
 // * Episode MUST be displayable to end user
-// * Episode MUST NOT be blank
+// * Episode MUST NOT be blank for video files
+// * Episode MUST BE BLANK for non-video files (as well as season)
 type EpisodeMetadata struct {
 	Season  string
 	Episode string
