@@ -11,6 +11,7 @@ var clusterRegex = regexp.MustCompile("\\s{2,}")
 var numberWithSpaceRegex = regexp.MustCompile(" (\\d+(?:.\\d+)?)")
 var startsWithNumberRegex = regexp.MustCompile("^(\\d+(?:.\\d+)?).*$")
 var fullNumberRegex = regexp.MustCompile("^\\d+$")
+var delimiterRegex = regexp.MustCompile("[-_]")
 
 //var badWords = []string{"x264", "x265", "opus", "aac", "mp4", "mp3", "mkv", "hevc", "avc", "flac", "dual", "webdl", "dvd", "cd", "rip"}
 //var badRegexes = []*regexp.Regexp{regexp.MustCompile("\\d+\\s*p"), regexp.MustCompile("\\dk")}
@@ -21,6 +22,7 @@ var sEpisodeRegex = regexp.MustCompile("(?i)episode\\s*(\\d+)")
 var sEpRegex = regexp.MustCompile("(?i)ep\\s*(\\d+)")
 var sSeasonRegex = regexp.MustCompile("(?i)season\\s*(\\d+)")
 var sSxERegex = regexp.MustCompile("(?i)(\\d+)\\s*x\\s*(\\d+)")
+var eDotSpaceRegex = regexp.MustCompile("(?i)(\\d+)\\.\\s")
 
 // ParseSingleEpisodeMetadata attempts to parse episode metadata from a single filename
 // See EpisodeMetadata for details
@@ -36,9 +38,8 @@ func ParseSingleEpisodeMetadata(filename string) EpisodeMetadata {
 	base := filepath.Base(filename)
 	base = strings.TrimSuffix(base, filepath.Ext(base))
 
-	// replace _ and - with spaces
-	spaced := strings.ReplaceAll(base, "_", " ")
-	spaced = strings.ReplaceAll(spaced, "-", " ")
+	// replace delimiters with spaces
+	spaced := delimiterRegex.ReplaceAllLiteralString(base, " ")
 
 	// try to find popular formats
 	if test := sSxERegex.FindStringSubmatch(spaced); test != nil {
@@ -64,12 +65,19 @@ func ParseSingleEpisodeMetadata(filename string) EpisodeMetadata {
 	}
 	if test := sEpRegex.FindStringSubmatch(spaced); test != nil {
 		resultEpisode = test[1]
+		spaced = sEpRegex.ReplaceAllLiteralString(spaced, "")
 	}
 	if test := sEpisodeRegex.FindStringSubmatch(spaced); test != nil {
 		resultEpisode = test[1]
+		spaced = sEpisodeRegex.ReplaceAllLiteralString(spaced, "")
+	}
+	if test := eDotSpaceRegex.FindStringSubmatch(spaced); test != nil {
+		resultEpisode = test[1]
+		spaced = eDotSpaceRegex.ReplaceAllLiteralString(spaced, "")
 	}
 	if test := sSeasonRegex.FindStringSubmatch(spaced); test != nil {
 		resultSeason = test[1]
+		spaced = sSeasonRegex.ReplaceAllLiteralString(spaced, "")
 	}
 
 	// remove brackets, they are almost always meaningless
@@ -87,7 +95,7 @@ func ParseSingleEpisodeMetadata(filename string) EpisodeMetadata {
 			if bracketDepth == 0 {
 				substr := substringStartEnd(spaced, startIndex+1, i)
 				// if bracket's only content is a number, it is a good candidate for episode
-				if resultEpisode == "" && fullNumberRegex.MatchString(substr) {
+				if resultEpisode == "" && fullNumberRegex.MatchString(substr) && len(substr) <= 3 {
 					resultEpisode = substr
 				}
 				spaced = substringStartEnd(spaced, 0, startIndex) + substringStart(spaced, i+1)

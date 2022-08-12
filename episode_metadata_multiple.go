@@ -7,10 +7,29 @@ import (
 )
 
 var spaceRegex = regexp.MustCompile("^\\s*$")
+var bracketRemoveRegex = regexp.MustCompile("\\[.*?\\]|\\(.*?\\)|\\{.*?\\}")
 
 type frequency struct {
 	value int
 	group int
+}
+
+func preCleanFileName(filename string) string {
+	return bracketRemoveRegex.ReplaceAllLiteralString(filename, "")
+}
+
+func postCleanData(data string) string {
+	data = strings.Trim(data, " -_/\\*.'")
+	data = strings.TrimSpace(data)
+	return data
+}
+
+func cleanFileNames(filename []string) []string {
+	result := make([]string, 0, len(filename))
+	for _, name := range filename {
+		result = append(result, preCleanFileName(name))
+	}
+	return result
 }
 
 // calculates number of distinct matches for each group and sorts them
@@ -54,14 +73,14 @@ func testFreqGroupMonotonous(frequencies []frequency) bool {
 	return true
 }
 
-func parseChangingEpisodes(filenames []string, regex *regexp.Regexp, episodeGroup int) []EpisodeMetadata {
+func parseChangingEpisodes(filenames []string, testSeasonFilename string, regex *regexp.Regexp, episodeGroup int) []EpisodeMetadata {
 	result := make([]EpisodeMetadata, 0, len(filenames))
 	// will trust try-hard single episode parser on this one
-	season := ParseSingleEpisodeMetadata(filenames[0]).Season
+	season := ParseSingleEpisodeMetadata(testSeasonFilename).Season
 	for _, name := range filenames {
 		test := regex.FindStringSubmatch(name)
 		result = append(result, EpisodeMetadata{
-			Episode: strings.Trim(test[episodeGroup], " "),
+			Episode: postCleanData(test[episodeGroup]),
 			Season:  season,
 		})
 	}
@@ -73,8 +92,8 @@ func parseEpisodesAndSeasons(filenames []string, regex *regexp.Regexp, seasonGro
 	for _, name := range filenames {
 		test := regex.FindStringSubmatch(name)
 		result = append(result, EpisodeMetadata{
-			Episode: strings.Trim(test[episodeGroup], " "),
-			Season:  strings.Trim(test[seasonGroup], " "),
+			Episode: postCleanData(test[episodeGroup]),
+			Season:  postCleanData(test[seasonGroup]),
 		})
 	}
 	return result
@@ -113,9 +132,10 @@ func ParseMultipleEpisodeMetadata(filenames []string) ([]EpisodeMetadata, bool) 
 	if len(filenames) == 1 {
 		return []EpisodeMetadata{ParseSingleEpisodeMetadata(filenames[0])}, true
 	}
-	videoFilenames := make([]string, 0, len(filenames))
+	cleanedFilenames := cleanFileNames(filenames)
+	videoFilenames := make([]string, 0, len(cleanedFilenames))
 
-	for _, name := range filenames {
+	for _, name := range cleanedFilenames {
 		if isVideo(name) {
 			videoFilenames = append(videoFilenames, name)
 		}
@@ -133,8 +153,8 @@ func ParseMultipleEpisodeMetadata(filenames []string) ([]EpisodeMetadata, bool) 
 
 	// definitely a single season with changing episodes
 	if varCount == 1 {
-		partialAnswer := parseChangingEpisodes(videoFilenames, regex, 1)
-		return restoreFullAnswer(filenames, videoFilenames, partialAnswer), true
+		partialAnswer := parseChangingEpisodes(videoFilenames, filenames[0], regex, 1)
+		return restoreFullAnswer(cleanedFilenames, videoFilenames, partialAnswer), true
 	}
 
 	frequencies := calcRegexFrequencies(videoFilenames, regex, varCount)
@@ -151,13 +171,13 @@ func ParseMultipleEpisodeMetadata(filenames []string) ([]EpisodeMetadata, bool) 
 	if groupMonotonous {
 		// definitely only episodes
 		if distinctFreqCount == 1 {
-			partialAnswer := parseChangingEpisodes(videoFilenames, regex, frequencies[len(frequencies)-1].group)
-			return restoreFullAnswer(filenames, videoFilenames, partialAnswer), true
+			partialAnswer := parseChangingEpisodes(videoFilenames, filenames[0], regex, frequencies[len(frequencies)-1].group)
+			return restoreFullAnswer(cleanedFilenames, videoFilenames, partialAnswer), true
 		}
 		// probably seasons and episodes
 		if distinctFreqCount == 2 {
 			partialAnswer := parseEpisodesAndSeasons(videoFilenames, regex, frequencies[len(frequencies)-2].group, frequencies[len(frequencies)-1].group)
-			return restoreFullAnswer(filenames, videoFilenames, partialAnswer), true
+			return restoreFullAnswer(cleanedFilenames, videoFilenames, partialAnswer), true
 		}
 	}
 

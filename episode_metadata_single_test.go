@@ -183,3 +183,27 @@ func TestSingleEpisodeMetadata30(t *testing.T) {
 	assert.Equal(t, metadata.Season, "")
 	assert.Equal(t, metadata.Episode, "")
 }
+
+func TestSingleEpisodeMetadata31(t *testing.T) {
+	metadata := ParseSingleEpisodeMetadata("[SubsPlease] Heion Sedai no Idaten-tachi - 01 (1080p) [28B342E5].mkv")
+	assert.Equal(t, metadata.Season, "Heion Sedai no Idaten tachi")
+	assert.Equal(t, metadata.Episode, "01")
+}
+
+func TestSingleEpisodeMetadata32(t *testing.T) {
+	metadata := ParseSingleEpisodeMetadata("The Tatami Galaxy - Special E01 [1080p][x265][10-bit].mkv")
+	assert.Equal(t, metadata.Season, "The Tatami Galaxy")
+	assert.Equal(t, metadata.Episode, "Special E01")
+}
+
+func TestSingleEpisodeMetadata33(t *testing.T) {
+	metadata := ParseSingleEpisodeMetadata("01. Sayonara Zetsubou Sensei [720p Hi10p AAC BDRip][kuchikirukia] [E24E9EB2].mkv")
+	assert.Equal(t, metadata.Season, "Sayonara Zetsubou Sensei")
+	assert.Equal(t, metadata.Episode, "01")
+}
+
+func TestSingleEpisodeMetadata34(t *testing.T) {
+	metadata := ParseSingleEpisodeMetadata("[Commie] Sayonara Zetsubou Sensei (2012) - BD Special [BD 720p AAC] [BEA51F1F].mkv")
+	assert.Equal(t, metadata.Season, "Sayonara Zetsubou Sensei")
+	assert.Equal(t, metadata.Episode, "BD Special")
+}
