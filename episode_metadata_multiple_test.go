@@ -31,16 +31,16 @@ func genSingle(season string, episode string) EpisodeMetadata {
 	}
 }
 
-func assertDiff(t *testing.T, expected []EpisodeMetadata, actual []EpisodeMetadata) {
+func assertDiff(t *testing.T, actual []EpisodeMetadata, expected []EpisodeMetadata) {
 	if len(expected) != len(actual) {
 		t.Fatalf("Invalid result length, expected %d, got %d", len(expected), len(actual))
 	}
 	for i := range expected {
 		if expected[i].Season != actual[i].Season {
-			t.Fatalf("Invalid season at #%d, expected %s, got %s", i, expected[i].Season, actual[i].Season)
+			t.Fatalf("Invalid season at #%d, expected '%s', got '%s'", i, expected[i].Season, actual[i].Season)
 		}
 		if expected[i].Episode != actual[i].Episode {
-			t.Fatalf("Invalid episode at #%d, expected %s, got %s", i, expected[i].Episode, actual[i].Episode)
+			t.Fatalf("Invalid episode at #%d, expected '%s', got '%s'", i, expected[i].Episode, actual[i].Episode)
 		}
 	}
 }
@@ -52,10 +52,7 @@ func TestMultipleEpisodeMetadata1(t *testing.T) {
 	expected := make([]EpisodeMetadata, 0, 256)
 	expected = append(expected, genOutput("01", "%03d", 1, 148)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
@@ -68,10 +65,7 @@ func TestMultipleEpisodeMetadata2(t *testing.T) {
 	expected = append(expected, genOutput("", "%02d", 1, 24)...)
 	expected = append(expected, genOutput("Season 2", "%02d", 1, 11)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
@@ -100,10 +94,7 @@ func TestMultipleEpisodeMetadata3(t *testing.T) {
 	expected = append(expected, genSingle("X2 Ten", "1.5"))
 	expected = append(expected, genOutput("X2 Ten", "%02d", 10, 12)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
@@ -116,10 +107,7 @@ func TestMultipleEpisodeMetadata4(t *testing.T) {
 	expected = append(expected, genOutput("01", "E%02d", 1, 24)...)
 	expected = append(expected, genSingle("01", "SP1"))
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
@@ -132,30 +120,11 @@ func TestMultipleEpisodeMetadata5(t *testing.T) {
 	expected = append(expected, genOutput("1", "%02d", 1, 24)...)
 	expected = append(expected, genOutput("2", "%02d", 1, 24)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
 func TestMultipleEpisodeMetadata6(t *testing.T) {
-	input := make([]string, 0, 256)
-	for i := 1; i <= 24; i++ {
-		input = append(input, fmt.Sprintf("nartsiss %02d/nartsiss %02d.mkv", i, i))
-	}
-
-	expected := make([]EpisodeMetadata, 0, 256)
-	expected = append(expected, genOutput("nartsiss", "%02d", 1, 24)...)
-
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
-	assertDiff(t, metadataArr, expected)
-}
-
-func TestMultipleEpisodeMetadata7(t *testing.T) {
 	input := make([]string, 0, 256)
 	for j := 1; j <= 2; j++ {
 		for i := 1; i <= 24; i++ {
@@ -163,17 +132,14 @@ func TestMultipleEpisodeMetadata7(t *testing.T) {
 		}
 	}
 	expected := make([]EpisodeMetadata, 0, 256)
-	expected = append(expected, genOutput("1", "%02d-01", 1, 24)...)
-	expected = append(expected, genOutput("2", "%02d-02", 1, 24)...)
+	expected = append(expected, genOutput("1", "%02d", 1, 24)...)
+	expected = append(expected, genOutput("2", "%02d", 1, 24)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
-func TestMultipleEpisodeMetadata8(t *testing.T) {
+func TestMultipleEpisodeMetadata7(t *testing.T) {
 	input := make([]string, 0, 256)
 	for j := 1; j <= 2; j++ {
 		for i := 1; i <= 24; i++ {
@@ -181,17 +147,14 @@ func TestMultipleEpisodeMetadata8(t *testing.T) {
 		}
 	}
 	expected := make([]EpisodeMetadata, 0, 256)
-	expected = append(expected, genOutput("1", "1x%02d", 1, 24)...)
-	expected = append(expected, genOutput("2", "2x%02d", 1, 24)...)
+	expected = append(expected, genOutput("1", "%02d", 1, 24)...)
+	expected = append(expected, genOutput("2", "%02d", 1, 24)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
-func TestMultipleEpisodeMetadata9(t *testing.T) {
+func TestMultipleEpisodeMetadata8(t *testing.T) {
 	input := make([]string, 0, 256)
 	input = append(input, genInput("[Anime Time] Durarara!!/[Anime Time] Durarara!! - %02d.mkv", 1, 12)...)
 	input = append(input, "[Anime Time] Durarara!!/[Anime Time] Durarara!! - 12.5.mkv")
@@ -217,14 +180,11 @@ func TestMultipleEpisodeMetadata9(t *testing.T) {
 	expected = append(expected, genSingle("X2 Ten", "1.5"))
 	expected = append(expected, genOutput("X2 Ten", "%02d", 10, 12)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
-func TestMultipleEpisodeMetadata10(t *testing.T) {
+func TestMultipleEpisodeMetadata9(t *testing.T) {
 	input := make([]string, 0, 256)
 	input = append(input, genInput("Dr Stone Season 2/Dr Stone - %02d.mkv", 1, 11)...)
 	input = append(input, genInput("Dr Stone/Dr Stone - %02d.mkv", 1, 24)...)
@@ -233,14 +193,11 @@ func TestMultipleEpisodeMetadata10(t *testing.T) {
 	expected = append(expected, genOutput("Season 2", "%02d", 1, 11)...)
 	expected = append(expected, genOutput("", "%02d", 1, 24)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
-func TestMultipleEpisodeMetadata11(t *testing.T) {
+func TestMultipleEpisodeMetadata10(t *testing.T) {
 	input := make([]string, 0, 256)
 	input = append(input, genInput("[Judas] Jujutsu Kaisen - S01E%02d.mkv", 1, 12)...)
 	input = append(input, "wrong template 1.txt")
@@ -255,14 +212,11 @@ func TestMultipleEpisodeMetadata11(t *testing.T) {
 	expected = append(expected, genSingle("01", "SP1"))
 	expected = append(expected, genSingle("", ""))
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
-func TestMultipleEpisodeMetadata12(t *testing.T) {
+func TestMultipleEpisodeMetadata11(t *testing.T) {
 	input := make([]string, 0, 12)
 	input = append(input, "[SubsPlease] Heion Sedai no Idaten-tachi - 01 (1080p) [28B342E5].mkv")
 	input = append(input, "[SubsPlease] Heion Sedai no Idaten-tachi - 02 (1080p) [2FB81205].mkv")
@@ -279,14 +233,11 @@ func TestMultipleEpisodeMetadata12(t *testing.T) {
 	expected := make([]EpisodeMetadata, 0, 12)
 	expected = append(expected, genOutput("Heion Sedai no Idaten tachi", "%02d", 1, 11)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
-func TestMultipleEpisodeMetadata13(t *testing.T) {
+func TestMultipleEpisodeMetadata12(t *testing.T) {
 	input := make([]string, 0, 256)
 	input = append(input, "[Reaktor] The Tatami Galaxy ED [1080p][x265][10-bit].mkv")
 	input = append(input, "[Reaktor] The Tatami Galaxy OP [1080p][x265][10-bit].mkv")
@@ -299,14 +250,11 @@ func TestMultipleEpisodeMetadata13(t *testing.T) {
 	expected = append(expected, genOutput("", "Special E%d", 1, 3)...)
 	expected = append(expected, genOutput("", "E%02d", 1, 11)...)
 
-	metadataArr, success := ParseMultipleEpisodeMetadata(input)
-	if !success {
-		t.Fatal("Used single parser here")
-	}
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }
 
-func TestMultipleEpisodeMetadata14(t *testing.T) {
+func TestMultipleEpisodeMetadata13(t *testing.T) {
 	input := make([]string, 0, 256)
 	input = append(input, "01. Sayonara Zetsubou Sensei [720p Hi10p AAC BDRip][kuchikirukia] [E24E9EB2].mkv")
 	input = append(input, "02. Sayonara Zetsubou Sensei [720p Hi10p AAC BDRip][kuchikirukia] [4BF38387].mkv")
@@ -350,6 +298,21 @@ func TestMultipleEpisodeMetadata14(t *testing.T) {
 	expected = append(expected, genOutput("Zan Sayonara Zetsubou Sensei Bangaichi", "%02d", 1, 2)...)
 	expected = append(expected, genSingle("Sayonara Zetsubou Sensei", "BD Special"))
 
-	metadataArr, _ := ParseMultipleEpisodeMetadata(input)
+	metadataArr := ParseMultipleEpisodeMetadata(input)
+	assertDiff(t, metadataArr, expected)
+}
+
+func TestMultipleEpisodeMetadata14(t *testing.T) {
+	input := make([]string, 0, 256)
+	input = append(input, genInput("[Judas] Hunter x Hunter (2011) - Episodes 001-148/[Judas] Hunter x Hunter (2011) - S01E%03d.mkv", 1, 148)...)
+	input = append(input, "[Judas] Hunter x Hunter (2011) - Movies/[Judas] Hunter X Hunter - Movie 1 - Phantom Rouge.mkv")
+	input = append(input, "[Judas] Hunter x Hunter (2011) - Movies/[Judas] Hunter X Hunter - Movie 2 - The Last Mission.mkv")
+
+	expected := make([]EpisodeMetadata, 0, 256)
+	expected = append(expected, genOutput("01", "%03d", 1, 148)...)
+	expected = append(expected, genSingle("Hunter X Hunter", "1"))
+	expected = append(expected, genSingle("Hunter X Hunter", "2"))
+
+	metadataArr := ParseMultipleEpisodeMetadata(input)
 	assertDiff(t, metadataArr, expected)
 }

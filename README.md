@@ -49,14 +49,12 @@ metadata := roflmeta.ParseSingleEpisodeMetadata("[Samir755] Hellsing Ultimate 02
 ```
 
 The "multiple" function tries to figure out information by restoring template used to generate torrent filenames.
-It fallbacks to single parser on failure:
-
 ```go
 import "github.com/rofleksey/roflmeta"
 
 filenames := []string{"S01E001.mkv", "S01E002.mkv", ..., "S01E148.mkv"}
 
-metadataSlice, noFallback := roflmeta.ParseMultipleEpisodeMetadata(filenames)
+metadataSlice := roflmeta.ParseMultipleEpisodeMetadata(filenames)
 // []EpisodeMetadata where season = 01, episode = 001...148
 ```
 
